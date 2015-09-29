@@ -1,20 +1,10 @@
-CONTACT: YOU
+CONTACT: DEV
     First Name: FELIX
     Last Name: MARTIN
-    Number: (319)-631-8592
-    Address: 3550 VISTA PARK DR
+    Number: N/A
+    Address: N/A
 CONTACT: FRIEND
     First Name: JIHAD
     Last Name: FAIR
     Number: N/A
     Address: 49 AMBER LN
-CONTACT: MOM
-    First Name: SANDY
-    Last Name: BRENNEMAN
-    Number: (319)-631-8708
-    Address: 3550 VISTA PARK DR
-CONTACT: DAD
-    First Name: DAVID
-    Last Name: BRENNEMAN
-    Number: (319)-631-8707
-    Address: 3550 VISTA PARK DR
