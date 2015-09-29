@@ -1,26 +1,38 @@
 import time
+import sys
+import os.path
 #define the database building API
 def build_db(path, mode=0):
     if mode == 0:
         
         db = {}
-        #while opening contacts.txt as f
-        with open(path) as f:
-            for line in f:
-                #strip the file and split each line from the 'CATEGORY' and the 'VALUE'
-                #e.g. split 'CONTACT: YOU' to 'CONTACT', 'YOU'
-                category, value = map(str.strip, line.split(":"))
-                #if the stripped line is the CONTACT line
-                if category == "CONTACT":
-                    #set the current contact to start a new dictionary with the value of the contact
-                    cur_contact = value
-                    db[value] = {}
-                #if the stripped line is the data within the CONTACT line
-                else:
-                    #set the previously set dictionarys data with another dictionary
-                    db.get(cur_contact, {})[category] = value
-        #return the database when its called
-        return db
+        if os.path.exists('contacts.txt') == False:
+            with open('contacts.txt', 'w') as f:
+                f.write('CONTACT: DEV')
+                f.write('\n    First Name: FELIX')
+                f.write('\n    Last Name: MARTIN')
+                f.write('\n    Number: N/A')
+                f.write('\n    Address: N/A')
+            print("Please re-run the program.")
+            quit()
+        else:
+            #while opening contacts.txt as f
+            with open(path) as f:
+                for line in f:
+                    #strip the file and split each line from the 'CATEGORY' and the 'VALUE'
+                    #e.g. split 'CONTACT: YOU' to 'CONTACT', 'YOU'
+                    category, value = map(str.strip, line.split(":"))
+                    #if the stripped line is the CONTACT line
+                    if category == "CONTACT":
+                        #set the current contact to start a new dictionary with the value of the contact
+                        cur_contact = value
+                        db[value] = {}
+                    #if the stripped line is the data within the CONTACT line
+                    else:
+                        #set the previously set dictionarys data with another dictionary
+                        db.get(cur_contact, {})[category] = value
+            #return the database when its called
+            return db
     #unless debug mode is set to 1
     
     else:
@@ -57,7 +69,7 @@ class App:
         print("LOADING . . .")
         print("LOADED!")
         self.contact_manager(db)
-
+    #add contact function
     def add_contact_to_db(self, db, contact_name, contact_fname, contact_lname, contact_number, contact_address):
         #set the contact_info to be empty
         contact_info = {}
@@ -67,6 +79,22 @@ class App:
         #if the contact_info_cmd is not None, or has existing data
         if contact_info_cmd is not None:
             raise KeyError("Contact already exists: {}".format(contact_name))
+        # check if any of the fields are empty
+        if contact_name == "" or contact_name == None:
+            print("Error! Contact Reference name cannot be blank!")
+            self.contact_manager(db)
+        if contact_fname == "" or contact_fname == None:
+            print("Error! Contact First Name cannot be blank!")
+            self.contact_manager(db)
+        if contact_lname == "" or contact_lname == None:
+            print("Error! Contact Last Name cannot be blank!")
+            self.contact_manager(db)
+        if contact_number == "" or contact_number == None:
+            print("Error! Contact Number cannot be blank!")
+            self.contact_manager(db)
+        if contact_address == "" or contact_address == None:
+            print("Error! Contact Address cannot be blank!")
+            self.contact_manager(db)
         #set uppercase data equal to user input
         contact_info['contact'] = contact_name.upper()
         contact_info['First Name'] = contact_fname.upper()
@@ -86,8 +114,8 @@ class App:
         db = build_db("contacts.txt")
             
         self.contact_manager(db)
-        
-    def read_contact(self, db, contact_name):
+    #search contact function
+    def search_contact(self, db, contact_name):
         #follow format
         formatting = """\
 CONTACT: {contact}
@@ -106,25 +134,58 @@ CONTACT: {contact}
         contact_info['contact'] = contact_name
         #finally, print the found contact and its values following the format
         print(formatting.format(**contact_info))
-        
         self.contact_manager(db)
-    
-    def write_db_to_file(self, db, out_path):
-        with open(out_path, 'w') as outf:
-            for contact_name in db:
-                outf.write(self.read_contact(db, contact_name.upper()))
         
-        self.contact_manager(db)        
-                
-    def remove_user_from_db(self, db, contact_name):
-        #try to delete specificed contact
-        try:
-            del db[contact_name.upper()]
-        #but if there is no such contact
-        except KeyError or contact_name.upper() is "dev":
+    #replicate search_contact function, however return the value for write_db_to_file
+    def read_contact(self, db, contact_name):
+        #follow format
+        formatting = """\
+CONTACT: {contact}
+    First Name: {First Name}
+    Last Name: {Last Name}
+    Number: {Number}
+    Address: {Address}
+"""
+        #grab user input
+        contact_name = contact_name.upper()
+        contact_info = db.get(contact_name)
+        #if userinput isnt a valid a contact        
+        if contact_info is None:
             raise KeyError("No such contact: {}".format(contact_name))
-        self.contact_manager(db)
+        #set the data equal to the user input
+        contact_info['contact'] = contact_name
+        #finally, return the found contact and its values following the format
+        return formatting.format(**contact_info)
     
+    #write_db_to_file function
+    def write_db_to_file(self, db, out_path):
+        with open(out_path, 'w+') as outf:
+            #for each contact
+            for contact_name in db:
+                #write the values of each in the correct format
+                outf.write(self.read_contact(db, contact_name.upper()))
+            #DEBUG/NOT WORKING: clear any blank lines
+            for line in outf:
+                if not line.isspace():
+                    outf.write(line)
+        self.contact_manager(db)     
+        
+    #remove_user function
+    def remove_user_from_db(self, db, contact_name):
+        #check to see if they are deleting default contact
+        if contact_name.upper() == "DEV":
+            print("Cannot delete that contact!")
+            self.contact_manager(db)
+        else:
+            #try searching for the given contact
+            try:
+                del db[contact_name.upper()]
+            #but if there is no such contact
+            except KeyError or contact_name.upper() is "dev":
+                raise KeyError("No such contact: {}".format(contact_name))
+            self.contact_manager(db)
+    
+    #main menu function
     def contact_manager(self, db):
 
         #init the menu
@@ -146,7 +207,7 @@ CONTACT: {contact}
         #... etc etc etc
         elif cmd.upper() == "READFILE":
             
-            self.read_contact(db, input("What contact shall you search?\n").upper())
+            self.search_contact(db, input("What contact shall you search?\n").upper())
         
         elif cmd.upper() == "DELCONTACT":
             
