@@ -69,6 +69,17 @@ class App:
         print("LOADING . . .")
         print("LOADED!")
         self.contact_manager(db)
+    
+    #format function
+    def format_contact_info(self, contact_info):
+        formatting = """CONTACT:{contact}
+    First Name: {First Name}
+    Last Name: {Last Name}
+    Number: {Number}
+    Address: {Address}"""
+
+        return formatting.format(**contact_info)
+    
     #add contact function
     def add_contact_to_db(self, db, contact_name, contact_fname, contact_lname, contact_number, contact_address):
         #set the contact_info to be empty
@@ -105,11 +116,7 @@ class App:
         #open up the file
         with open('contacts.txt', 'a+') as f:
             #write the data
-            f.write("\nCONTACT: " + contact_info['contact'])
-            f.write("\n    First Name: " + contact_info['First Name'])
-            f.write("\n    Last Name: " + contact_info['Last Name'])
-            f.write("\n    Number: " + contact_info['Number'])
-            f.write("\n    Address: " + contact_info['Address'])
+            f.write("\n"+self.format_contact_info(contact_info))
             #rebuild the db
         db = build_db("contacts.txt")
         self.contact_manager(db)
@@ -125,13 +132,6 @@ class App:
         self.contact_manager(db)
     #search contact function
     def search_contact(self, db, contact_name):
-        #follow format
-        formatting = """\
-CONTACT: {contact}
-    First Name: {First Name}
-    Last Name: {Last Name}
-    Number: {Number}
-    Address: {Address}"""
         #grab user input
         contact_name = contact_name.upper()
         contact_info = db.get(contact_name)
@@ -141,19 +141,11 @@ CONTACT: {contact}
         #set the data equal to the user input
         contact_info['contact'] = contact_name
         #finally, print the found contact and its values following the format
-        print(formatting.format(**contact_info))
+        print(self.format_contact_info(**contact_info))
         self.contact_manager(db)
         
     #replicate search_contact function, however return the value for write_db_to_file
     def read_contact(self, db, contact_name):
-        #follow format
-        formatting = """\
-CONTACT: {contact}
-    First Name: {First Name}
-    Last Name: {Last Name}
-    Number: {Number}
-    Address: {Address}\
-"""
         #grab user input
         contact_name = contact_name.upper()
         contact_info = db.get(contact_name)
@@ -163,16 +155,23 @@ CONTACT: {contact}
         #set the data equal to the user input
         contact_info['contact'] = contact_name
         #finally, return the found contact and its values following the format
-        return formatting.format(**contact_info)
+        return self.format_contact_info(**contact_info)
     
     #write_db_to_file function
     def write_db_to_file(self, db, out_path):
         with open(out_path, 'w+') as outf:
-            #for each contact
             for contact_name in db:
-                #write the values of each in the correct format
-                outf.write(self.read_contact(db, contact_name.upper()))
+                this_contact = self.extract(contact_name.upper(), db) 
+                outf.write(self.format_contact_info(this_contact))
+                outf.write('\n')
         self.contact_manager(db)
+        
+    #extract function
+    def extract(self, contact_name, db):
+        contact_name = contact_name.upper()
+        contact_info = db.get(contact_name)
+        contact_info['contact'] = contact_name 
+        return contact_info
         
     #remove_user function
     def remove_user_from_db(self, db, contact_name):
