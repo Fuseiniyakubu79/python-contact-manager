@@ -112,7 +112,16 @@ class App:
             f.write("\n    Address: " + contact_info['Address'])
             #rebuild the db
         db = build_db("contacts.txt")
-            
+        self.contact_manager(db)
+        
+    #debug function
+    def clear_file(self, db):
+        f = open('contacts.txt', 'r')
+        i = 0
+        for line in f:
+            i += 1
+            p = f.readlines()
+            print(p[i])
         self.contact_manager(db)
     #search contact function
     def search_contact(self, db, contact_name):
@@ -122,8 +131,7 @@ CONTACT: {contact}
     First Name: {First Name}
     Last Name: {Last Name}
     Number: {Number}
-    Address: {Address}
-"""
+    Address: {Address}"""
         #grab user input
         contact_name = contact_name.upper()
         contact_info = db.get(contact_name)
@@ -144,7 +152,7 @@ CONTACT: {contact}
     First Name: {First Name}
     Last Name: {Last Name}
     Number: {Number}
-    Address: {Address}
+    Address: {Address}\
 """
         #grab user input
         contact_name = contact_name.upper()
@@ -164,11 +172,7 @@ CONTACT: {contact}
             for contact_name in db:
                 #write the values of each in the correct format
                 outf.write(self.read_contact(db, contact_name.upper()))
-            #DEBUG/NOT WORKING: clear any blank lines
-            for line in outf:
-                if not line.isspace():
-                    outf.write(line)
-        self.contact_manager(db)     
+        self.contact_manager(db)
         
     #remove_user function
     def remove_user_from_db(self, db, contact_name):
@@ -212,6 +216,11 @@ CONTACT: {contact}
         elif cmd.upper() == "DELCONTACT":
             
             self.remove_user_from_db(db, input("What contact shall you delete?\n"))
+            
+        elif cmd.upper() == "CLRFILE":
+            
+            self.clear_file(db)
+            
         #if the cmd is quit
         elif cmd.upper() == "QUIT":
             #thank the user for using my program
@@ -224,7 +233,7 @@ CONTACT: {contact}
         elif cmd.upper() == "DEBUG()":
             
             print("Activating DEBUG Function.\n")
-            print(db)
+            print("Nothing set to debug.\n")
             self.contact_manager(db)
         #finally, if it is none of these
         else:
